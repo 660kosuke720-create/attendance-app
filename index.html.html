@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>出退勤打刻</title>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1976d2">
+
+  <style>
+    body { font-family: system-ui, sans-serif; background:#f5f7fb; margin:0; }
+    main { max-width:420px; margin:24px auto; background:#fff; padding:20px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,.08); }
+    h1 { font-size:20px; margin-bottom:12px; }
+    label { display:block; margin-top:12px; font-size:14px; }
+    input { width:100%; padding:10px; margin-top:6px; }
+    button { width:100%; padding:12px; margin-top:12px; font-size:16px; border:none; border-radius:8px; cursor:pointer; }
+    .in { background:#1976d2; color:#fff; }
+    .out { background:#388e3c; color:#fff; }
+    .done { background:#f57c00; color:#fff; }
+    pre { margin-top:12px; background:#eee; padding:10px; font-size:12px; white-space:pre-wrap; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>出退勤打刻</h1>
+
+  <label>研修生ID
+    <input id="userId" value="user01">
+  </label>
+
+  <button class="in" onclick="send('clockIn')">出勤</button>
+  <button class="out" onclick="send('clockOut')">退勤</button>
+
+  <label>アプリURL（課題完了用）
+    <input id="appUrl" placeholder="https://xxxxx.github.io/attendance-app">
+  </label>
+
+  <button class="done" onclick="send('reportDone')">🎉課題完了報告</button>
+
+  <pre id="out"></pre>
+</main>
+
+<script>
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzKz8dp6_jWZdT69XBW1j2TgXBDrHylU0oC-GmBjDiaXEBMpovY_RjBYHnQmOC0WbFT/exec";
+
+async function send(action){
+  const userId = document.getElementById('userId').value.trim();
+  const appUrl = document.getElementById('appUrl').value.trim();
+  const out = document.getElementById('out');
+  out.textContent = "送信中...";
+
+  try {
+    const params = new URLSearchParams({ action, userId, appUrl });
+    const res = await fetch(GAS_URL, { method: "POST", body: params });
+    out.textContent = await res.text();
+  } catch(e){
+    out.textContent = "エラー: " + e.message;
+  }
+}
+
+// PWA
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js');
+}
+</script>
+</body>
+</html>
